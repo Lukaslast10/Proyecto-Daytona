@@ -1,23 +1,34 @@
-CREATE DATEBASE IF NOT EXISTS daytona_login.php; 
--- creamos la bd con el nombre "daytona_login"
+CREATE DATEBASE daytona_login.php; 
 USE daytona_login.php;
 
--- creamos las tablas
+-- tabla de roles
+CREATE TABLE roles (
+    id_rol INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    nombre_rol VARCHAR(20) NOT NULL UNIQUE
+);
 
--- empleados que se registran o logean
-CREATE TABLE usuarios ( -- datos necesarios - id, usuario, clave, email, perfil
-    id INT AUTO_INCREMENT PRIMARY KEY, 
-    usuario VARCHAR(40) UNIQUE NOT NULL,
-    clave VARCHAR(200) NOT NULL,
+-- roles del sistema
+INSERT INTO roles (nombre_rol) VALUES ('admin');
+INSERT INTO roles (nombre_rol) VALUES ('usuario');
+
+-- tabla usuarios
+CREATE TABLE usuarios ( 
+    id_usuario INT NOT NULL AUTO_INCREMENT PRIMARY KEY, 
+    nombre_usuario VARCHAR(50) NOT NULL,
+    clave VARCHAR(255) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
-    perfil ENUM('usuario','administrador') NOT NULL DEFAULT 'usuario',
-    -- fecha_registro ?
+    id_rol INT NOT NULL DEFAULT 2,
+    fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_rol) REFERENCES roles(id_rol)
 );
 
--- auditoria de los accesos
-CREATE TABLE accesos ( -- datos necesarios - id, usuario, fecha
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    usuario VARCHAR(40) NOT NULL,
-    fecha_hora DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, -- necesario porque sino sabemos cuando pasó no auditamos nada
-    resultado ENUM('existoso','fallido') NOT NULL
+-- tabla de accesos / auditoria de logs
+CREATE TABLE accesos ( 
+    id_acceso INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    id_usuario INT NOT NULL,
+    fecha_acceso DATETIME DEFAULT CURRENT_TIMESTAMP, 
+    ip_usuario VARCHAR(45) NOT NULL,
+    resultado VARCHAR(20) NOT NULL DEFAULT 'exito'
+    FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario)
 );
+
