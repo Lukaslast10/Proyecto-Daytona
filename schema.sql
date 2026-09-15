@@ -32,3 +32,4 @@ CREATE TABLE accesos (
     FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario)
 );
 
+
