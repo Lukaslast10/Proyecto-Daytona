@@ -11,7 +11,7 @@ CREATE TABLE roles (
 INSERT INTO roles (nombre_rol) VALUES ('admin');
 INSERT INTO roles (nombre_rol) VALUES ('usuario');
 
--- tabla usuarios
+-- tabla de usuarios
 CREATE TABLE usuarios ( 
     id_usuario INT NOT NULL AUTO_INCREMENT PRIMARY KEY, 
     nombre_usuario VARCHAR(50) NOT NULL,
@@ -31,5 +31,4 @@ CREATE TABLE accesos (
     resultado VARCHAR(20) NOT NULL DEFAULT 'exito'
     FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario)
 );
-
-
+-- avisen si agregan o sacan algo
