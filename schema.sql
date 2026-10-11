@@ -1,4 +1,4 @@
-CREATE DATEBASE daytona_login.php; 
+CREATE DATABASE daytona_login.php; 
 USE daytona_login.php;
 
 -- tabla de roles
