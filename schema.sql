@@ -1,5 +1,5 @@
-CREATE DATABASE daytona_login.php; 
-USE daytona_login.php;
+CREATE DATABASE daytona_login; 
+USE daytona_login;
 
 -- tabla de roles
 CREATE TABLE roles (
@@ -28,7 +28,7 @@ CREATE TABLE accesos (
     id_usuario INT NOT NULL,
     fecha_acceso DATETIME DEFAULT CURRENT_TIMESTAMP, 
     ip_usuario VARCHAR(45) NOT NULL,
-    resultado VARCHAR(20) NOT NULL DEFAULT 'exito'
+    resultado VARCHAR(20) NOT NULL DEFAULT 'exito',
     FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario)
 );
 -- avisen si agregan o sacan algo
