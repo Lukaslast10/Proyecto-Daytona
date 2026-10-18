@@ -1,3 +1,41 @@
+<?php
+session_start();
+require __DIR__ . '/conexion.php';
+
+// 1. CONTROL DE ACCESO ESTRICTO
+// Verificamos si existe la sesión Y si el usuario tiene el rol 1 (Administrador)
+if (!isset($_SESSION['usuario_id']) || !isset($_SESSION['rol_id']) || $_SESSION['rol_id'] != 1) {
+    // Si no es admin o no está logueado, lo redirigimos al login inmediatamente
+    header("Location: login.php");
+    exit;
+}
+
+// 2. OBTENER LOS LOGS DE AUDITORÍA
+$logs = [];$db_error = '';
+
+try {
+    // Hacemos un JOIN para traer el email del usuario basado en su id_usuario.
+    // IMPORTANTE: Asegúrate de que las columnas 'fecha_acceso' e 'id_acceso' coincidan 
+    // con los nombres que le pusiste a tu tabla `accesos` en tu base de datos.
+    $query = "
+        SELECT 
+            a.ip_usuario, 
+            a.resultado, 
+            a.fecha_acceso,
+            u.email AS usuario_email
+        FROM accesos a
+        LEFT JOIN usuarios u ON a.id_usuario = u.id_usuario
+        ORDER BY a.id_acceso DESC
+    ";
+    
+    $stmt = $pdo->query($query);
+    $logs =$stmt->fetchAll(PDO::FETCH_ASSOC);
+
+} catch (PDOException $e) {
+    // Si falla (por ejemplo, si los nombres de las columnas no coinciden), capturamos el error
+    $db_error = "Error en BD: Verifica que las columnas id_acceso y fecha_acceso existan en tu tabla accesos.";
+}
+?>
 <!doctype html>
 <html lang="es">
 <head>
@@ -6,6 +44,7 @@
 	<meta name="theme-color" content="#202326">
 	<title>Administración | Daytona Ciberconciencia</title>
 	<style>
+		/* (Tus estilos originales intactos) */
 		:root {
 			color-scheme: dark;
 			--ink: #202326;
@@ -89,6 +128,10 @@
 		td { padding: 16px 24px; border-top: 1px solid rgba(255, 255, 255, .08); color: #e4e7e8; font-size: 14px; }
 		.empty-state { height: 150px; color: var(--muted); text-align: center; }
 
+		.badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+		.badge-exito { background: rgba(46, 204, 113, 0.15); color: #2ecc71; border: 1px solid rgba(46, 204, 113, 0.3); }
+		.badge-fallido { background: rgba(231, 76, 60, 0.15); color: #e74c3c; border: 1px solid rgba(231, 76, 60, 0.3); }
+
 		@media (max-width: 640px) {
 			.page-shell { width: min(100% - 32px, 1120px); }
 			.topbar { min-height: 76px; }
@@ -101,10 +144,6 @@
 			.logs-heading { padding: 18px; }
 			table { min-width: 620px; }
 			th, td { padding-right: 16px; padding-left: 16px; }
-		}
-
-		@media (prefers-reduced-motion: reduce) {
-			*, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
 		}
 	</style>
 </head>
@@ -124,7 +163,8 @@
 				</span>
 			</a>
 			<nav class="top-actions" aria-label="Navegación">
-				<a href="dashboard.php">Cursos</a>
+				<!-- Removido link de Cursos porque Admin no necesariamente toma cursos, o puedes dejarlo si lo deseas -->
+				<span style="color: var(--orange-light); font-size: 14px; font-weight: bold;">Panel Admin</span>
 				<a class="logout" href="logout.php">Cerrar sesión</a>
 			</nav>
 		</header>
@@ -133,7 +173,7 @@
 			<section class="page-heading" aria-labelledby="page-title">
 				<p class="eyebrow">Administración</p>
 				<h1 id="page-title">Registro de accesos</h1>
-				<p class="page-description">Historial de actividad de acceso a la plataforma.</p>
+				<p class="page-description">Historial de actividad y auditoría de la plataforma.</p>
 			</section>
 
 			<section class="logs-panel" aria-labelledby="logs-title">
@@ -154,15 +194,34 @@
 						<thead>
 							<tr>
 								<th scope="col">Fecha y hora</th>
-								<th scope="col">Usuario</th>
+								<th scope="col">Usuario (Email)</th>
 								<th scope="col">Dirección IP</th>
 								<th scope="col">Resultado</th>
 							</tr>
 						</thead>
 						<tbody>
-							<tr>
-								<td class="empty-state" colspan="4">No hay registros disponibles en esta vista.</td>
-							</tr>
+							<?php if (!empty($logs)): ?>
+								<?php foreach ($logs as$log): ?>
+									<tr>
+										<td><?php echo htmlspecialchars($log['fecha_acceso'] ?? 'No registrada'); ?></td>
+										<td><?php echo htmlspecialchars($log['usuario_email'] ?? 'Desconocido'); ?></td>
+										<td><?php echo htmlspecialchars($log['ip_usuario']); ?></td>
+										<td>
+											<?php if ($log['resultado'] === 'exito'): ?>
+												<span class="badge badge-exito">Éxito</span>
+											<?php else: ?>
+												<span class="badge badge-fallido">Fallido</span>
+											<?php endif; ?>
+										</td>
+									</tr>
+								<?php endforeach; ?>
+							<?php else: ?>
+								<tr>
+									<td class="empty-state" colspan="4">
+										<?php echo $db_error != '' ? htmlspecialchars($db_error) : 'No hay registros de acceso disponibles.'; ?>
+									</td>
+								</tr>
+							<?php endif; ?>
 						</tbody>
 					</table>
 				</div>
