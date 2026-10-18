@@ -4,30 +4,53 @@ require 'conexion.php';
 $mensaje = '';
 $error = '';
 
+// Generar Token CSRF si no existe en la sesión
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $nombre = trim($_POST['nombre']);
-    $email = trim($_POST['email']);
+    
+    // Validar el Token CSRF
+    if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+        die("Error de validación de seguridad (CSRF).");
+    }
+
+    // Sanitizar las entradas
+    // htmlspecialchars evita inyecciones XSS en el nombre
+    $nombre = htmlspecialchars(trim($_POST['nombre']), ENT_QUOTES, 'UTF-8');
+    // filter_var limpia caracteres ilegales del email
+    $email = filter_var(trim($_POST['email']), FILTER_SANITIZE_EMAIL);
     $password = $_POST['password'];
 
-    // Verificar si el email ya existe en la base de datos
-    $stmt = $pdo->prepare("SELECT id_usuario FROM usuarios WHERE email = ?");
-    $stmt->execute([$email]);
-    
-    if ($stmt->rowCount() > 0) {
-        $error = "El correo electrónico ya está registrado.";
-    } else {
-        // Encriptar la contraseña por seguridad
-        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+    // 1. Validar formato de Email real
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $error = "El formato del correo electrónico no es válido.";
+    } 
+    // 2. Validar seguridad de la contraseña (Requisito del TP)
+    elseif (!preg_match('/^(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/', $password)) {
+        $error = "La contraseña debe tener mínimo 8 caracteres, una mayúscula, un número y un símbolo.";
+    } 
+    else {
+        // Verificar si el email ya existe en la base de datos
+        $stmt = $pdo->prepare("SELECT id_usuario FROM usuarios WHERE email = ?");
+        $stmt->execute([$email]);
         
-        // Insertar el nuevo usuario (id_rol = 2 por defecto para usuarios normales)
-        $insert = $pdo->prepare("INSERT INTO usuarios (nombre_usuario, email, clave, id_rol) VALUES (?, ?, ?, 2)");
-        
-        if ($insert->execute([$nombre, $email, $hashed_password])) {
-            $mensaje = "Registro exitoso. Serás redirigido al login...";
-            // Redirigir al login después de 2 segundos para que el usuario lea el mensaje
-            header("refresh:2;url=login.php"); 
+        if ($stmt->rowCount() > 0) {
+            $error = "El correo electrónico ya está registrado.";
         } else {
-            $error = "Hubo un error al crear la cuenta. Intenta de nuevo.";
+            // Encriptar la contraseña (PASSWORD_DEFAULT es excelente y seguro)
+            $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+            
+            // Insertar el nuevo usuario (id_rol = 2)
+            $insert = $pdo->prepare("INSERT INTO usuarios (nombre_usuario, email, clave, id_rol) VALUES (?, ?, ?, 2)");
+            
+            if ($insert->execute([$nombre, $email, $hashed_password])) {
+                $mensaje = "Registro exitoso. Serás redirigido al login...";
+                header("refresh:2;url=login.php"); 
+            } else {
+                $error = "Hubo un error al crear la cuenta. Intenta de nuevo.";
+            }
         }
     }
 }
@@ -190,10 +213,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <?php if($mensaje != '') echo "<div class='msg-exito'>" . htmlspecialchars($mensaje) . "</div>"; ?>
 
 		<form method="POST" action="registro.php">
-            <div class="field">
-				<label for="nombre">Nombre Completo</label>
-				<input id="nombre" name="nombre" type="text" placeholder="Ej. Juan Pérez" required autofocus>
-			</div>
+    <!-- Token de Seguridad CSRF -->
+    <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+    
+    <div class="field">
+        <label for="nombre">Nombre Completo</label>
+        <input id="nombre" name="nombre" type="text" placeholder="Ej. Juan Pérez" required autofocus>
+    </div>
+    <!-- ... resto de tus inputs ... -->
 
 			<div class="field">
 				<label for="email">Correo Electrónico (Email)</label>
