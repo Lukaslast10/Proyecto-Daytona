@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 12-10-2026 a las 02:02:44
+-- Tiempo de generación: 19-10-2026 a las 03:23:24
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -40,18 +40,10 @@ CREATE TABLE `accesos` (
 --
 
 INSERT INTO `accesos` (`id_acceso`, `id_usuario`, `fecha_acceso`, `ip_usuario`, `resultado`) VALUES
-(1, 1, '2026-10-11 18:14:57', '::1', 'exito'),
-(2, 1, '2026-10-11 18:28:29', '::1', 'exito'),
-(3, 2, '2026-10-11 19:23:20', '::1', 'exito'),
-(4, 1, '2026-10-11 19:34:54', '::1', 'exito'),
-(5, 1, '2026-10-11 19:36:42', '::1', 'exito'),
-(6, 1, '2026-10-11 19:40:05', '::1', 'fallido'),
-(7, 1, '2026-10-11 19:43:19', '::1', 'exito'),
-(8, 1, '2026-10-11 19:43:37', '::1', 'exito'),
-(9, 1, '2026-10-11 19:55:56', '::1', 'exito'),
-(10, 1, '2026-10-11 20:00:03', '::1', 'exito'),
-(11, 1, '2026-10-11 20:00:25', '::1', 'exito'),
-(12, 1, '2026-10-11 20:02:26', '::1', 'exito');
+(23, 5, '2026-10-18 22:14:06', '::1', 'exito'),
+(24, 5, '2026-10-18 22:14:59', '::1', 'exito'),
+(25, 5, '2026-10-18 22:17:02', '::1', 'fallido'),
+(26, 7, '2026-10-18 22:20:19', '::1', 'exito');
 
 -- --------------------------------------------------------
 
@@ -139,8 +131,9 @@ CREATE TABLE `usuarios` (
 --
 
 INSERT INTO `usuarios` (`id_usuario`, `nombre_usuario`, `clave`, `email`, `id_rol`, `fecha_registro`) VALUES
-(1, 'Facundo Agustin', '$2y$10$Cszp1cLwu1EYMXXTTV2UeOd/k0RdJPI96qY0./NmtDSwR8VFjG2JS', 'agustinfreccero09@gmail.com', 2, '2026-10-11 21:14:41'),
-(2, 'admin', '$2y$10$uZC94C0v8wGvZf73AnOa7Od/uovdsVGKG3JYo7bHOmPuw.lIj.11G', 'admin@daytona.com', 2, '2026-10-11 22:23:01');
+(5, 'admin', '$2y$10$KUkj/oxCrMGKY5yzKlFVYefYDPCDtge/5TU6t/Hmy7Pq6XHURcZW6', 'test@daytona.com', 1, '2026-10-19 01:13:53'),
+(6, 'usuario', '$2y$10$4U3tknXqSnXvdT03wRD6OutVAje1v4Omg7e6JESm4iXgUDlzAvWue', 'usuario@gmail.com', 2, '2026-10-19 01:16:03'),
+(7, 'admin2', '$2y$10$ZLyHibH1U/9kvFvpqBWvluELPGUSCixhBgXOFbiXNKhBjHZiJ5ZBK', 'admin@daytona.com', 1, '2026-10-19 01:19:58');
 
 --
 -- Índices para tablas volcadas
@@ -189,7 +182,7 @@ ALTER TABLE `usuarios`
 -- AUTO_INCREMENT de la tabla `accesos`
 --
 ALTER TABLE `accesos`
-  MODIFY `id_acceso` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id_acceso` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- AUTO_INCREMENT de la tabla `cursos`
@@ -213,7 +206,7 @@ ALTER TABLE `roles`
 -- AUTO_INCREMENT de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `id_usuario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id_usuario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- Restricciones para tablas volcadas
